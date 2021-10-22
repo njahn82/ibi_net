@@ -1,3 +1,5 @@
 ### Praxismodul Bibliometrie M26 IBI HU
 
-https://mybinder.org/v2/gh/njahn82/ibi_net/HEAD?urlpath=rstudio
+Übung im Rahmen des Moduls "Informetrie, Bibliometrie, Scientometrie" des [Weiterbildende Masterstudiengang Bibliotheks- und Informationswissenschaft im Fernstudium am IBI der HU Berlin](https://moodle.hu-berlin.de/enrol/index.php?id=107648).
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/njahn82/ibi_net/HEAD?urlpath=rstudio)
