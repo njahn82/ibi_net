@@ -1,0 +1,159 @@
+---
+output: github_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  fig.width = 6,
+  fig.asp = 0.618,
+  dpi = 300)
+```
+
+```{r}
+library(tidyverse) # https://www.tidyverse.org/
+library(rcrossref) # R Client Crossref remote::install_github("ropensci/rcrossref)
+# sna
+library(sna)
+library(network)
+library(ggnet)
+```
+
+### Data
+
+JASIST Publikationsmetadaten über Crossref Schnittstelle beziehen
+
+```{r}
+jasist <- rcrossref::cr_works(filter = list(
+  issn = "2330-1643",
+  from_pub_date = "2020-01-01",
+  until_pub_date = "2020-12-31"
+), limit = 250)
+jasist_md <- jasist$data
+jasist_md
+```
+
+### Referenzanalyse
+
+Wie viele und welche Publikationen referenzierten JASIST Artikel 2020?
+
+```{r}
+# referenzen
+jasist_cit <- jasist_md %>%
+  select(doi, title, reference) %>%
+  unnest(reference)
+jasist_cit
+```
+
+Verteilung
+
+```{r}
+# referenzen per artikel
+cit_stat <- jasist_cit %>%
+  group_by(doi) %>%
+  summarise(ref_n = n_distinct(key),
+            ref_cr = sum(!is.na(DOI))) %>%
+  mutate(prop = ref_cr / ref_n)
+```
+
+
+top 10
+
+```{r}
+cit_stat %>%
+  arrange(desc(ref_n))
+```
+
+Parameter
+
+```{r}
+# referenzen
+summary(cit_stat$ref_n)
+```
+
+```{r}
+# anteil referenzen mit crossref doi
+summary(cit_stat$prop)
+```
+
+Verteilung Referenzen je Artikel
+
+```{r}
+ggplot(cit_stat, aes(ref_n)) +
+  geom_density(fill = "#56b4e9") +
+  theme_minimal() +
+  labs(x = "Anzahl Referenzen je JASIST-Artikel")
+```
+
+### Netzwerkanalyse
+
+Zitationsdaten
+
+```{r}
+cit_df <- jasist_cit %>%
+  filter(!is.na(DOI)) %>%
+  select(doi, ref_doi = DOI) %>%
+  mutate(ref_doi = tolower(ref_doi)) %>%
+  distinct()
+```
+
+Meist zitierte Arbeiten
+
+````{r}
+cit_df %>%
+  count(ref_doi, sort = TRUE)
+````
+
+Matrix
+
+```{r}
+# nur Artikel mit mehr als einer Zotation
+dois_cit <- cit_df %>%
+  count(ref_doi, sort = TRUE) %>%
+  filter(n > 1)
+my_cit <- cit_df %>%
+  filter(ref_doi %in% dois_cit$ref_doi)
+my_mat <- as.matrix(table(my_cit$doi, my_cit$ref_doi))
+dim(my_mat)
+```
+
+Netzwerkobjekt für die Visualisierung
+
+#### Welche Artikel sind bibliographisch gekoppelt
+
+```{r}
+mat_t <- my_mat %*% t(my_mat)
+dim(mat_t)
+```
+
+Visualisierung
+
+```{r}
+net <- network::as.network.matrix(mat_t, directed = FALSE)
+ggnet::ggnet2(net, size = "degree", color = "#56b4e9") +
+  geom_point(aes(color = color), color = "grey90") +
+  guides(color = FALSE, size = FALSE) +
+  labs(title = "Bibliographic coupling JASIST 2020")
+```
+
+#### Co-Zitationsnetzwerk
+
+
+```{r}
+mat_t <- t(my_mat) %*% (my_mat)
+dim(mat_t)
+```
+
+Visualisierung
+
+```{r}
+net <- network::as.network.matrix(mat_t, directed = FALSE)
+ggnet::ggnet2(net, size = "degree", color = "#56b4e9") +
+  geom_point(aes(color = color), color = "grey90") +
+  guides(color = FALSE, size = FALSE) +
+  labs(title = "Co-Citation network JASIST 2020")
+```
