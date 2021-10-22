@@ -1,6 +1,10 @@
 
 ``` r
-library(tidyverse) # https://www.tidyverse.org/
+# tidyverse packages https://www.tidyverse.org/ 
+library(dplyr) 
+library(tidyr)
+library(ggplot2)
+# ropensci client for crossref
 library(rcrossref) # R Client Crossref remote::install_github("ropensci/rcrossref)
 # sna
 library(sna)
@@ -162,10 +166,10 @@ cit_df %>%
 #> # … with 2,589 more rows
 ```
 
-Matrix
+#### Zitationsmatrix und visualisierung
 
 ``` r
-# nur Artikel mit mehr als einer Zotation
+# nur Artikel mit mehr als einer Zitation
 dois_cit <- cit_df %>%
   count(ref_doi, sort = TRUE) %>%
   filter(n > 1)
@@ -190,15 +194,15 @@ Visualisierung
 
 ``` r
 net <- network::as.network.matrix(mat_t, directed = FALSE)
-ggnet::ggnet2(net, size = "degree", color = "#56b4e9") +
+ggnet::ggnet2(net, size = "degree", color = "#56b4e9", alpha = 0.8) +
   geom_point(aes(color = color), color = "grey90") +
-  guides(color = FALSE, size = FALSE) +
+  guides(color = "none", size = "none") +
   labs(title = "Bibliographic coupling JASIST 2020")
 ```
 
 ![](uebung_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
-#### Co-Zitationsnetzwerk
+#### Welche Artikel werden co-zitiert in JASIST-Artikeln von 2020
 
 ``` r
 mat_t <- t(my_mat) %*% (my_mat)
@@ -210,9 +214,9 @@ Visualisierung
 
 ``` r
 net <- network::as.network.matrix(mat_t, directed = FALSE)
-ggnet::ggnet2(net, size = "degree", color = "#56b4e9") +
+ggnet::ggnet2(net, size = "degree", color = "#56b4e9", alpha = 0.8) +
   geom_point(aes(color = color), color = "grey90") +
-  guides(color = FALSE, size = FALSE) +
+  guides(color = "none", size = "none") +
   labs(title = "Co-Citation network JASIST 2020")
 ```
 
