@@ -1,4 +1,13 @@
 
+### Setup
+
+In einem ersten Schritt müssen einige wichtige R-Bibliotheken importiert
+werden. Wichtig für die Analyse der Zitationen über Crossref ist die
+[`rcrossref`-Bibliothek](https://github.com/ropensci/rcrossref), die den
+Datenabzug über einie der [von Crossref bereitgestellten Schnittstellen
+(API)](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
+erleichtert.
+
 ``` r
 # tidyverse packages https://www.tidyverse.org/ 
 library(dplyr) 
@@ -14,7 +23,24 @@ library(ggnet)
 
 ### Data
 
-JASIST Publikationsmetadaten über Crossref Schnittstelle beziehen
+Zunächst sollen JASIST Publikationsmetadaten über die Crossref
+Schnittstelle gezogen werden. Im folgenden Code-Schnippet wird die
+Funktion `cr_works` aus der `rcrossref`-Bibliothek aufgerufen. Die
+Funktion hat zwei benannte Argumente: `filter` und `limit`. Während
+`limit` die Zahl der zurückgegebenen Treffer begrenzt, wird mit `filter`
+angegeben, welche Werke aus der Gesamtmenge der Titel auf crossref
+ausgegeben werden soll. [Weitere
+Filtereinstellungen](https://docs.ropensci.org/rcrossref/reference/filters.html)
+sind in der entsprechenden Dokumentation zur R-Bibliothek zu finden.
+
+Die Treffermenge wird mit dem `<-`-Operator der Variable `jasist`
+zugewiesen. `jasist`, d.h. der Output der Funktion `cr_works`, gibt eine
+Liste mit drei Elementen zurück, von denen aber für die weitere Analyse
+nur das Element `data` interessiert, das die Publikationsmetadaten
+enthält.
+
+Der Einfachheit halber wird also die Liste mit dem Namen `data` aus
+`jasist`-Liste in eine eigene Variable (`jasist_md`) geschrieben.
 
 ``` r
 jasist <- rcrossref::cr_works(filter = list(
@@ -28,15 +54,15 @@ jasist_md
 #>    alternative.id    archive container.title   created deposited published.print
 #>    <chr>             <chr>   <chr>             <chr>   <chr>     <chr>          
 #>  1 10.1002/asi.24432 Portico Journal of the A… 2020-1… 2021-04-… 2021-05        
-#>  2 10.1002/asi.24416 Portico Journal of the A… 2020-1… 2021-03-… 2021-04        
-#>  3 10.1002/asi.24348 Portico Journal of the A… 2020-0… 2020-11-… 2020-12        
-#>  4 10.1002/asi.24407 Portico Journal of the A… 2020-0… 2020-08-… 2020-09        
-#>  5 10.1002/asi.24395 Portico Journal of the A… 2020-0… 2021-03-… 2021-02        
-#>  6 10.1002/asi.24363 Portico Journal of the A… 2020-0… 2020-04-… 2020-05        
-#>  7 10.1002/asi.24429 Portico Journal of the A… 2020-1… 2021-04-… 2021-05        
-#>  8 10.1002/asi.24435 Portico Journal of the A… 2020-1… 2020-11-… 2020-12        
-#>  9 10.1002/asi.24344 Portico Journal of the A… 2020-0… 2020-11-… 2020-12        
-#> 10 10.1002/asi.24279 Portico Journal of the A… 2019-0… 2021-06-… 2020-05        
+#>  2 10.1002/asi.24363 Portico Journal of the A… 2020-0… 2020-04-… 2020-05        
+#>  3 10.1002/asi.24435 Portico Journal of the A… 2020-1… 2020-11-… 2020-12        
+#>  4 10.1002/asi.24429 Portico Journal of the A… 2020-1… 2021-04-… 2021-05        
+#>  5 10.1002/asi.24279 Portico Journal of the A… 2019-0… 2021-06-… 2020-05        
+#>  6 10.1002/asi.24348 Portico Journal of the A… 2020-0… 2020-11-… 2020-12        
+#>  7 10.1002/asi.24407 Portico Journal of the A… 2020-0… 2020-08-… 2020-09        
+#>  8 10.1002/asi.24395 Portico Journal of the A… 2020-0… 2021-03-… 2021-02        
+#>  9 10.1002/asi.24362 Portico Journal of the A… 2020-0… 2020-12-… 2021-01        
+#> 10 10.1002/asi.24366 Portico Journal of the A… 2020-0… 2020-12-… 2021-01        
 #> # … with 116 more rows, and 29 more variables: published.online <chr>,
 #> #   doi <chr>, indexed <chr>, issn <chr>, issue <chr>, issued <chr>,
 #> #   member <chr>, page <chr>, prefix <chr>, publisher <chr>, score <chr>,
@@ -49,6 +75,56 @@ jasist_md
 ### Referenzanalyse
 
 Wie viele und welche Publikationen referenzierten JASIST Artikel 2020?
+
+`jasist_md` enthält die Publikationsmetadaten zu Aufsätzen aus der
+Zeitschrift JASIST aus dem oben als Filter angegebenen Zeitraum. Um den
+folgenden Code-Schnipsel zu verstehen, bietet es sich an, die
+`jasist_md`-Daten etwas genauer anzuschauen. In RStudio geht dies leicht
+über den Reiter *Environment*. Mit einem Klick auf die jeweilige
+Variable lässt sich der Inhalt näher untersuchen.
+
+![](img/table_symbol.png)
+
+Mit einem Klick auf das Tabellensymbol am rechten Rand der Zeile der
+Variable lässt sich der Variableninhalt in einer eigenen Tabelle
+einsehen.
+
+In dieser Ansicht entsprich eine Zeile einem Datensatz (=
+Zeitschriftenaufsatz). Die letzte Spalte mit dem Titel *reference*
+enthält ihrerseits eine Liste. Es handelt sich hierbei um eine Liste in
+einer Liste.
+
+Diese Verschachtelung ist wichtig, um den folgenden Code-Schnipsel zu
+verstehen.
+
+Hier werden aus `jasist_md` drei Spalten selektiert: `doi`, `title` und
+`reference`. Die ersten beiden enthalten schlicht Strings (also
+einfachen Text). Der komplexe Datentyp in der `reference`-Spalte lässt
+sich nicht ohne Weiteres in einer Tabellenform darstellen; man müsste
+hier eigentlich eine Tabelle in eine Zelle einfügen, was die Handhabung
+erheblich erschweren würde.
+
+Hier kommt nun die Funktion `unnest` ins Spiel, die die verschachtelte
+Liste (*nested list* auf Englisch) gewissermaßen auspackt.
+
+Die Logik dahinter entspricht folgendem Schema:
+
+    | A | B | a b c | --> unnest --> | A | B | a |
+    | X | Y | x y z |                | A | B | b |
+                                     | A | B | c |
+                                     | X | Y | x |
+                                     | X | Y | y |
+                                     | X | Y | z |
+
+Es wird also für jedes Element in der verschachtelten Liste der
+übergeordnete Datensatz kopiert.
+
+Im konkreten Beispiel führt dies dazu, dass `jasist_cit` letztlich eine
+Zeile je in einem JASIST-Aufsatz zitierten Titel aufweist, wobei die
+ersten beiden Spalten DOI und Titel des JASIST-Aufsatzes beinhalten (und
+so oft wiederholt werden, wie es Referenzen im jeweiligen Aufsatz gibt),
+die restlichen Spalten jedoch die bibliographischen Details des
+zitierten Titels.
 
 ``` r
 # referenzen
@@ -74,6 +150,15 @@ jasist_cit
 #> #   volume.title <chr>, series.title <chr>
 ```
 
+Die Vorschau gibt schon die Zahl der Zeilen (4443) an. Möchte man sich
+jedoch per Funktion explizit ausgeben lassen, kann man hierfür die
+`nrow()` verwenden:
+
+``` r
+nrow(jasist_cit)
+#> [1] 4443
+```
+
 Verteilung
 
 ``` r
@@ -83,6 +168,21 @@ cit_stat <- jasist_cit %>%
   summarise(ref_n = n_distinct(key),
             ref_cr = sum(!is.na(DOI))) %>%
   mutate(prop = ref_cr / ref_n)
+cit_stat
+#> # A tibble: 92 × 4
+#>    doi               ref_n ref_cr  prop
+#>    <chr>             <int>  <int> <dbl>
+#>  1 10.1002/asi.24256   116     71 0.612
+#>  2 10.1002/asi.24257    46     33 0.717
+#>  3 10.1002/asi.24258    29     22 0.759
+#>  4 10.1002/asi.24259    71     45 0.634
+#>  5 10.1002/asi.24260     2      1 0.5  
+#>  6 10.1002/asi.24262    71     55 0.775
+#>  7 10.1002/asi.24279    40     14 0.35 
+#>  8 10.1002/asi.24280    80     37 0.462
+#>  9 10.1002/asi.24282    33     18 0.545
+#> 10 10.1002/asi.24285     3      3 1    
+#> # … with 82 more rows
 ```
 
 top 10
@@ -131,7 +231,7 @@ ggplot(cit_stat, aes(ref_n)) +
   labs(x = "Anzahl Referenzen je JASIST-Artikel")
 ```
 
-![](uebung_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](uebung_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ### Netzwerkanalyse
 
@@ -200,7 +300,7 @@ ggnet::ggnet2(net, size = "degree", color = "#56b4e9", alpha = 0.8) +
   labs(title = "Bibliographic coupling JASIST 2020")
 ```
 
-![](uebung_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](uebung_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 #### Welche Artikel werden co-zitiert in JASIST-Artikeln von 2020
 
@@ -220,4 +320,4 @@ ggnet::ggnet2(net, size = "degree", color = "#56b4e9", alpha = 0.8) +
   labs(title = "Co-Citation network JASIST 2020")
 ```
 
-![](uebung_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](uebung_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->

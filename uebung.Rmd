@@ -62,12 +62,67 @@ jasist_md
 
 Wie viele und welche Publikationen referenzierten JASIST Artikel 2020?
 
+`jasist_md` enthält die Publikationsmetadaten zu Aufsätzen aus der Zeitschrift JASIST
+aus dem oben als Filter angegebenen Zeitraum.
+Um den folgenden Code-Schnipsel zu verstehen, bietet es sich an,
+die `jasist_md`-Daten etwas genauer anzuschauen.
+In RStudio geht dies leicht über den Reiter *Environment*.
+Mit einem Klick auf die jeweilige Variable lässt sich der Inhalt näher untersuchen.
+
+![](img/table_symbol.png)
+
+Mit einem Klick auf das Tabellensymbol am rechten Rand der Zeile der Variable lässt
+sich der Variableninhalt in einer eigenen Tabelle einsehen.
+
+In dieser Ansicht entsprich eine Zeile einem Datensatz (= Zeitschriftenaufsatz).
+Die letzte Spalte mit dem Titel *reference* enthält ihrerseits eine Liste.
+Es handelt sich hierbei um eine Liste in einer Liste.
+
+Diese Verschachtelung ist wichtig, um den folgenden Code-Schnipsel zu verstehen.
+
+Hier werden aus `jasist_md` drei Spalten selektiert: `doi`, `title` und `reference`.
+Die ersten beiden enthalten schlicht Strings (also einfachen Text).
+Der komplexe Datentyp in der `reference`-Spalte lässt sich nicht ohne Weiteres in
+einer Tabellenform darstellen; man müsste hier eigentlich eine Tabelle in eine
+Zelle einfügen, was die Handhabung erheblich erschweren würde.
+
+Hier kommt nun die Funktion `unnest` ins Spiel, die die verschachtelte Liste
+(*nested list* auf Englisch) gewissermaßen auspackt.
+
+Die Logik dahinter entspricht folgendem Schema:
+
+```
+| A | B | a b c | --> unnest --> | A | B | a |
+| X | Y | x y z |                | A | B | b |
+                                 | A | B | c |
+                                 | X | Y | x |
+                                 | X | Y | y |
+                                 | X | Y | z |
+```
+
+Es wird also für jedes Element in der verschachtelten Liste der übergeordnete
+Datensatz kopiert.
+
+Im konkreten Beispiel führt dies dazu, dass `jasist_cit` letztlich eine Zeile
+je in einem JASIST-Aufsatz zitierten Titel aufweist, wobei die ersten beiden
+Spalten DOI und Titel des JASIST-Aufsatzes beinhalten (und so oft wiederholt
+werden, wie es Referenzen im jeweiligen Aufsatz gibt), die restlichen Spalten jedoch
+die bibliographischen Details des zitierten Titels.
+
 ```{r}
 # referenzen
 jasist_cit <- jasist_md %>%
   select(doi, title, reference) %>%
   unnest(reference)
 jasist_cit
+```
+
+Die Vorschau gibt schon die Zahl der Zeilen (4443) an.
+Möchte man sich jedoch per Funktion explizit ausgeben lassen, kann man hierfür
+die `nrow()` verwenden:
+
+```{r}
+nrow(jasist_cit)
 ```
 
 Verteilung
@@ -79,6 +134,7 @@ cit_stat <- jasist_cit %>%
   summarise(ref_n = n_distinct(key),
             ref_cr = sum(!is.na(DOI))) %>%
   mutate(prop = ref_cr / ref_n)
+cit_stat
 ```
 
 
