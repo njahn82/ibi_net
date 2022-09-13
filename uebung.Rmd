@@ -16,6 +16,11 @@ knitr::opts_chunk$set(
 
 ### Setup
 
+In einem ersten Schritt müssen einige wichtige R-Bibliotheken importiert werden.
+Wichtig für die Analyse der Zitationen über Crossref ist die [`rcrossref`-Bibliothek](https://github.com/ropensci/rcrossref),
+die den Datenabzug über einie der [von Crossref bereitgestellten Schnittstellen (API)](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
+erleichtert.
+
 ```{r}
 # tidyverse packages https://www.tidyverse.org/ 
 library(dplyr) 
@@ -31,7 +36,17 @@ library(ggnet)
 
 ### Data
 
-JASIST Publikationsmetadaten über Crossref Schnittstelle beziehen
+Zunächst sollen JASIST Publikationsmetadaten über die Crossref Schnittstelle gezogen werden.
+Im folgenden Code-Schnippet wird die Funktion `cr_works` aus der `rcrossref`-Bibliothek aufgerufen.
+Die Funktion hat zwei benannte Argumente: `filter` und `limit`. Während `limit` die Zahl der zurückgegebenen
+Treffer begrenzt, wird mit `filter` angegeben, welche Werke aus der Gesamtmenge der Titel auf crossref
+ausgegeben werden soll.
+[Weitere Filtereinstellungen](https://docs.ropensci.org/rcrossref/reference/filters.html) sind in der entsprechenden Dokumentation zur R-Bibliothek zu finden.
+
+Die Treffermenge wird mit dem `<-`-Operator der Variable `jasist` zugewiesen.
+`jasist`, d.h. der Output der Funktion `cr_works`, gibt eine Liste mit drei Elementen zurück, von denen aber für die weitere Analyse nur das Element `data` interessiert, das die Publikationsmetadaten enthält.
+
+Der Einfachheit halber wird also die Liste mit dem Namen `data` aus `jasist`-Liste in eine eigene Variable (`jasist_md`) geschrieben.
 
 ```{r}
 jasist <- rcrossref::cr_works(filter = list(
