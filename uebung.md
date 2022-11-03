@@ -1,3 +1,7 @@
+Netzwerke mit offenen Zitationsdaten
+================
+
+### Setup
 
 ``` r
 # tidyverse packages https://www.tidyverse.org/ 
@@ -25,25 +29,25 @@ jasist <- rcrossref::cr_works(filter = list(
 jasist_md <- jasist$data
 jasist_md
 #> # A tibble: 126 × 35
-#>    alternative.id    archive container.title   created deposited published.print
-#>    <chr>             <chr>   <chr>             <chr>   <chr>     <chr>          
-#>  1 10.1002/asi.24432 Portico Journal of the A… 2020-1… 2021-04-… 2021-05        
-#>  2 10.1002/asi.24416 Portico Journal of the A… 2020-1… 2021-03-… 2021-04        
-#>  3 10.1002/asi.24348 Portico Journal of the A… 2020-0… 2020-11-… 2020-12        
-#>  4 10.1002/asi.24407 Portico Journal of the A… 2020-0… 2020-08-… 2020-09        
-#>  5 10.1002/asi.24395 Portico Journal of the A… 2020-0… 2021-03-… 2021-02        
-#>  6 10.1002/asi.24363 Portico Journal of the A… 2020-0… 2020-04-… 2020-05        
-#>  7 10.1002/asi.24429 Portico Journal of the A… 2020-1… 2021-04-… 2021-05        
-#>  8 10.1002/asi.24435 Portico Journal of the A… 2020-1… 2020-11-… 2020-12        
-#>  9 10.1002/asi.24344 Portico Journal of the A… 2020-0… 2020-11-… 2020-12        
-#> 10 10.1002/asi.24279 Portico Journal of the A… 2019-0… 2021-06-… 2020-05        
-#> # … with 116 more rows, and 29 more variables: published.online <chr>,
-#> #   doi <chr>, indexed <chr>, issn <chr>, issue <chr>, issued <chr>,
-#> #   member <chr>, page <chr>, prefix <chr>, publisher <chr>, score <chr>,
-#> #   source <chr>, reference.count <chr>, references.count <chr>,
+#>    alterna…¹ archive conta…² created depos…³ publi…⁴ publi…⁵ doi   indexed issn 
+#>    <chr>     <chr>   <chr>   <chr>   <chr>   <chr>   <chr>   <chr> <chr>   <chr>
+#>  1 10.1002/… Portico Journa… 2020-1… 2020-1… 2020-12 2020-1… 10.1… 2022-0… 2330…
+#>  2 10.1002/… Portico Journa… 2020-1… 2021-0… 2021-05 2020-1… 10.1… 2022-0… 2330…
+#>  3 10.1002/… Portico Journa… 2020-0… 2020-1… 2021-01 2020-0… 10.1… 2022-1… 2330…
+#>  4 10.1002/… Portico Journa… 2020-0… 2020-1… 2020-12 2020-0… 10.1… 2022-0… 2330…
+#>  5 10.1002/… Portico Journa… 2020-0… 2021-0… 2021-03 2020-0… 10.1… 2022-1… 2330…
+#>  6 10.1002/… Portico Journa… 2020-1… 2021-0… 2021-05 2020-1… 10.1… 2022-0… 2330…
+#>  7 10.1002/… Portico Journa… 2020-0… 2021-0… 2021-02 2020-0… 10.1… 2022-0… 2330…
+#>  8 10.1002/… Portico Journa… 2020-0… 2020-1… 2021-01 2020-0… 10.1… 2022-0… 2330…
+#>  9 10.1002/… Portico Journa… 2020-0… 2021-0… 2020-05 <NA>    10.1… 2022-0… 2330…
+#> 10 10.1002/… Portico Journa… 2019-0… 2022-0… 2020-05 <NA>    10.1… 2022-0… 2330…
+#> # … with 116 more rows, 25 more variables: issue <chr>, issued <chr>,
+#> #   member <chr>, prefix <chr>, publisher <chr>, score <chr>, source <chr>,
+#> #   reference.count <chr>, references.count <chr>,
 #> #   is.referenced.by.count <chr>, subject <chr>, title <chr>, type <chr>,
 #> #   update.policy <chr>, url <chr>, volume <chr>, language <chr>,
-#> #   short.container.title <chr>, assertion <list>, author <list>, …
+#> #   short.container.title <chr>, assertion <list>, link <list>, license <list>,
+#> #   page <chr>, author <list>, reference <list>, funder <list>, and …
 ```
 
 ### Referenzanalyse
@@ -57,21 +61,21 @@ jasist_cit <- jasist_md %>%
   unnest(reference)
 jasist_cit
 #> # A tibble: 4,443 × 15
-#>    doi    title     key   unstructured   issue doi.asserted.by first.page DOI   
-#>    <chr>  <chr>     <chr> <chr>          <chr> <chr>           <chr>      <chr> 
-#>  1 10.10… Describi… e_1_… Andersen J.(2… <NA>  <NA>            <NA>       <NA>  
-#>  2 10.10… Describi… e_1_… Atlassian Cor… <NA>  <NA>            <NA>       <NA>  
-#>  3 10.10… Describi… e_1_… Atlassian Cor… <NA>  <NA>            <NA>       <NA>  
-#>  4 10.10… Describi… e_1_… <NA>           2     crossref        139        10.22…
-#>  5 10.10… Describi… e_1_… <NA>           <NA>  <NA>            <NA>       <NA>  
-#>  6 10.10… Describi… e_1_… <NA>           <NA>  <NA>            <NA>       <NA>  
-#>  7 10.10… Describi… e_1_… <NA>           <NA>  <NA>            <NA>       <NA>  
-#>  8 10.10… Describi… e_1_… <NA>           2     crossref        135        10.10…
-#>  9 10.10… Describi… e_1_… <NA>           <NA>  <NA>            <NA>       <NA>  
-#> 10 10.10… Describi… e_1_… Entertainment… <NA>  <NA>            <NA>       <NA>  
-#> # … with 4,433 more rows, and 7 more variables: article.title <chr>,
-#> #   volume <chr>, author <chr>, year <chr>, journal.title <chr>,
-#> #   volume.title <chr>, series.title <chr>
+#>    doi      title key   volum…¹ author year  issue doi.a…² first…³ DOI   artic…⁴
+#>    <chr>    <chr> <chr> <chr>   <chr>  <chr> <chr> <chr>   <chr>   <chr> <chr>  
+#>  1 10.1002… Tran… e_1_… Archiv… Brown… 2013  <NA>  <NA>    <NA>    <NA>  <NA>   
+#>  2 10.1002… Tran… e_1_… <NA>    Gauld… 2017  3     crossr… 227     10.1… Democr…
+#>  3 10.1002… Tran… e_1_… <NA>    Gilli… 2014  <NA>  <NA>    17      <NA>  Re con…
+#>  4 10.1002… Tran… e_1_… <NA>    <NA>   <NA>  <NA>  <NA>    <NA>    <NA>  <NA>   
+#>  5 10.1002… Tran… e_1_… <NA>    <NA>   <NA>  <NA>  <NA>    <NA>    <NA>  <NA>   
+#>  6 10.1002… Tran… e_1_… <NA>    <NA>   <NA>  <NA>  <NA>    <NA>    <NA>  <NA>   
+#>  7 10.1002… Tran… e_1_… <NA>    <NA>   <NA>  <NA>  publis… <NA>    10.1… <NA>   
+#>  8 10.1002… Tran… e_1_… <NA>    <NA>   <NA>  <NA>  <NA>    <NA>    <NA>  <NA>   
+#>  9 10.1002… Peop… e_1_… Explor… Agarw… 2017  <NA>  <NA>    <NA>    <NA>  <NA>   
+#> 10 10.1002… Peop… e_1_… <NA>    <NA>   <NA>  <NA>  publis… <NA>    10.1… <NA>   
+#> # … with 4,433 more rows, 4 more variables: volume <chr>, journal.title <chr>,
+#> #   unstructured <chr>, series.title <chr>, and abbreviated variable names
+#> #   ¹​volume.title, ²​doi.asserted.by, ³​first.page, ⁴​article.title
 ```
 
 Verteilung
@@ -95,13 +99,13 @@ cit_stat %>%
 #>    <chr>             <int>  <int> <dbl>
 #>  1 10.1002/asi.24387   122     67 0.549
 #>  2 10.1002/asi.24256   116     71 0.612
-#>  3 10.1002/asi.24354   113     44 0.389
+#>  3 10.1002/asi.24354   113     45 0.398
 #>  4 10.1002/asi.24339   105     63 0.6  
 #>  5 10.1002/asi.24342   103     55 0.534
 #>  6 10.1002/asi.24362    96     76 0.792
 #>  7 10.1002/asi.24390    96     51 0.531
 #>  8 10.1002/asi.24358    95     47 0.495
-#>  9 10.1002/asi.24367    89     59 0.663
+#>  9 10.1002/asi.24367    89     60 0.674
 #> 10 10.1002/asi.24415    87     72 0.828
 #> # … with 82 more rows
 ```
@@ -119,7 +123,7 @@ summary(cit_stat$ref_n)
 # anteil referenzen mit crossref doi
 summary(cit_stat$prop)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.1429  0.5097  0.5969  0.6050  0.7228  1.0000
+#>  0.1429  0.5097  0.6000  0.6073  0.7228  1.0000
 ```
 
 Verteilung Referenzen je Artikel
@@ -150,7 +154,7 @@ Meist zitierte Arbeiten
 ``` r
 cit_df %>%
   count(ref_doi, sort = TRUE)
-#> # A tibble: 2,599 × 2
+#> # A tibble: 2,606 × 2
 #>    ref_doi                           n
 #>    <chr>                         <int>
 #>  1 10.1002/asi.24232                 6
@@ -163,7 +167,7 @@ cit_df %>%
 #>  8 10.1145/2740908.2742839           3
 #>  9 10.11645/11.1.2188                3
 #> 10 10.2307/41409970                  3
-#> # … with 2,589 more rows
+#> # … with 2,596 more rows
 ```
 
 #### Zitationsmatrix und visualisierung
@@ -177,7 +181,7 @@ my_cit <- cit_df %>%
   filter(ref_doi %in% dois_cit$ref_doi)
 my_mat <- as.matrix(table(my_cit$doi, my_cit$ref_doi))
 dim(my_mat)
-#> [1]  64 107
+#> [1]  64 108
 ```
 
 Netzwerkobjekt für die Visualisierung
@@ -207,7 +211,7 @@ ggnet::ggnet2(net, size = "degree", color = "#56b4e9", alpha = 0.8) +
 ``` r
 mat_t <- t(my_mat) %*% (my_mat)
 dim(mat_t)
-#> [1] 107 107
+#> [1] 108 108
 ```
 
 Visualisierung
